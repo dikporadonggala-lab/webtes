@@ -268,7 +268,7 @@
                     <div class="d-flex align-items-center mb-4">
                         <img id="footerLogo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Lambang_Kabupaten_Donggala.png/400px-Lambang_Kabupaten_Donggala.png" alt="Logo" class="rounded bg-white p-1 me-3" style="width: 55px; height: 55px; object-fit: contain;">
                         <div>
-                            <h4 class="fw-bold text-white mb-0" style="letter-spacing: 0.5px;">DISDIKPORA</h4>
+                            <h4 class="fw-bold text-white mb-0" style="letter-spacing: 0.5px;">SDN 13 DAMPELAS</h4>
                             <small class="fw-bold" style="color: #868e96;">KABUPATEN DONGGALA</small>
                         </div>
                     </div>
@@ -302,7 +302,7 @@
                         </li>
                         <li class="mb-3 d-flex align-items-center">
                             <i class="fab fa-whatsapp me-3 text-success" style="font-size: 1.2rem;"></i>
-                            <span>Chat WhatsApp Admin</span>
+                            <a href="#" id="footerWaLink" target="_blank" class="footer-link">Chat WhatsApp Admin</a>
                         </li>
                         <li class="mb-3 d-flex align-items-center">
                             <i class="fas fa-envelope me-3 text-primary" style="font-size: 1.1rem;"></i>
@@ -460,7 +460,7 @@
                                 
                                 <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Alamat, WhatsApp & Medsos</h6>
                                 <div class="mb-3"><label class="form-label fw-semibold">Alamat Sekolah</label><input type="text" class="form-control" id="alamatIn"></div>
-                                <div class="mb-3"><label class="form-label fw-semibold"><i class="fab fa-whatsapp text-success me-1"></i>Nomor WhatsApp (Cth: 628123...)</label><input type="text" class="form-control" id="waIn" placeholder="Awali dengan 62 tanpa spasi/simbol"></div>
+                                <div class="mb-3"><label class="form-label fw-semibold"><i class="fab fa-whatsapp text-success me-1"></i>Nomor WhatsApp (Cth: 08123...)</label><input type="text" class="form-control" id="waIn" placeholder="Awali dengan 08 / 62 tanpa spasi/simbol"></div>
                                 
                                 <div class="row g-2 mb-3">
                                     <div class="col-6"><label class="form-label fw-semibold"><i class="fab fa-youtube text-danger me-1"></i>URL YouTube</label><input type="text" class="form-control" id="ytIn"></div>
@@ -483,7 +483,7 @@
     <script>
         // ==============================================================
         // MASUKKAN URL GOOGLE APPS SCRIPT DI SINI
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyuFYGuP7u-qehA0QME12g-JnIQUA75xzrV4V23IIsYjdZhWreYY4xUhelNEilA3yVVlQ/exec";
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzieacm3cYQX-67ljGUHA8nbuKNR-nVWwqfjSv1OOfySUCkVeenmW5eZM0OKVwlh1A7aw/exec";
         // ==============================================================
 
         let globalBeritaData = []; 
@@ -663,13 +663,34 @@
                 document.getElementById('footerAlamat').textContent = s.Alamat_Sekolah || "-";
                 [['ytLink', s.URL_YouTube], ['tiktokLink', s.URL_TikTok], ['instaLink', s.URL_Instagram], ['fbLink', s.URL_Facebook], ['xLink', s.URL_X]].forEach(link => { const el = document.getElementById(link[0]); if(link[1]) { el.setAttribute('href', link[1]); el.classList.remove('d-none'); } });
 
+                // ==========================================
+                // SOLUSI BUG WHATSAPP DENGAN AUTO-FORMATTER
+                // ==========================================
                 const waBtn = document.getElementById('waFloatBtn');
+                const footerWaLink = document.getElementById('footerWaLink');
+
                 if (s.No_WhatsApp && String(s.No_WhatsApp).trim() !== "") {
-                    const waNum = String(s.No_WhatsApp).replace(/\D/g,'');
-                    waBtn.href = `https://wa.me/${waNum}`;
+                    // Hanya ambil angkanya saja
+                    let waNum = String(s.No_WhatsApp).replace(/\D/g, '');
+                    
+                    // Auto-koreksi (Jika dimulai dengan 08, ubah jadi 628)
+                    if (waNum.startsWith('08')) {
+                        waNum = '62' + waNum.substring(1);
+                    } else if (waNum.startsWith('8')) {
+                        waNum = '62' + waNum;
+                    }
+
+                    const waUrl = `https://wa.me/${waNum}`;
+                    if(waBtn) waBtn.href = waUrl;
+                    if(footerWaLink) footerWaLink.href = waUrl;
                 }
 
-                const appsList = data.apps || [];
+                // ==========================================
+                // SOLUSI BUG APLIKASI DAN GALERI "MEMUAT..."
+                // ==========================================
+                // Menghilangkan baris kosong dengan filter() agar tidak error
+                const appsList = (data.apps || []).filter(app => app && app[1] && String(app[1]).trim() !== "");
+                
                 const appColors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#6610f2'];
                 document.getElementById('appContainer').innerHTML = appsList.length > 0 ? appsList.map((app, index) => {
                     const color = appColors[index % appColors.length];
@@ -690,7 +711,8 @@
 
                 if (appsList.length > 3) initSlider('appWrapper', 150);
 
-                const galeriList = data.galeri || [];
+                const galeriList = (data.galeri || []).filter(g => g && g[1] && String(g[1]).trim() !== "");
+                
                 document.getElementById('galeriContainer').innerHTML = galeriList.length > 0 ? galeriList.map(g => `<div class="slide-item galeri"><div class="card shadow-sm border-0 h-100"><img src="${fixGoogleDriveLink(g[2])}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;"><div class="card-body text-center p-2"><p class="card-text fw-semibold mb-1 small">${g[1]}</p><button class="btn btn-sm btn-outline-danger admin-panel mt-1" onclick="hapusFoto('${g[0]}')"><i class="fas fa-trash me-1"></i>Hapus</button></div></div></div>`).join('') : '<p class="text-muted text-center w-100 mt-2">Belum ada foto.</p>';
                 
                 if (galeriList.length > 2) initSlider('galeriWrapper', 300);
@@ -803,7 +825,6 @@
         function hapusStatistik(id) { if(confirm("Hapus kartu statistik ini permanen?")) { fetch(GAS_WEB_APP_URL, { method: 'POST', mode: 'cors', body: JSON.stringify({ action: "hapus_stat", id: id }) }).then(() => window.location.reload()); } }
         document.getElementById('formBosConfig').addEventListener('submit', function(e) { handleConfigSubmit(e, 'btnSubmitBosConfig', [['Bos_SKL', document.getElementById('bosSklIn').value || 0], ['Bos_Isi', document.getElementById('bosIsiIn').value || 0], ['Bos_Proses', document.getElementById('bosProsesIn').value || 0], ['Bos_Penilaian', document.getElementById('bosPenilaianIn').value || 0], ['Bos_PTK', document.getElementById('bosPtkIn').value || 0], ['Bos_Sarpras', document.getElementById('bosSarprasIn').value || 0], ['Bos_Pengelolaan', document.getElementById('bosPengelolaanIn').value || 0], ['Bos_Pembiayaan', document.getElementById('bosPembiayaanIn').value || 0]]); });
         
-        // Simpan Teks (Logo tidak masuk kesini lagi karena sudah file upload terpisah)
         document.getElementById('formConfig').addEventListener('submit', function(e) { 
             handleConfigSubmit(e, 'btnSubmitConfig', [
                 ['URL_SPMB', document.getElementById('urlSpmbIn').value], 
@@ -855,7 +876,6 @@
             }); 
         }
 
-        // FUNGSI BARU UNTUK UPLOAD LOGO
         function handleLogoUpload(input) { 
             if(!input.files[0]) return; 
             document.getElementById('logoLoading').classList.remove('d-none'); 
