@@ -155,10 +155,7 @@
                     <div class="card profile-card bg-dark position-relative">
                         <div class="ratio ratio-16x9 position-relative" id="videoWrapper">
                             <iframe id="ksVideo" src="" title="Video Profil" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                        <div class="card-body text-center bg-primary text-white py-2">
-                            <h6 class="card-title fw-bold mb-0" id="ksNama">Memuat Nama...</h6>
-                        </div>
+                        </div>                       
                     </div>
                 </div>
                 <div class="col-lg-6 d-flex flex-column justify-content-start">
@@ -629,8 +626,7 @@
                         videoWrapper.appendChild(placeholder);
                     }
                 }
-
-                document.getElementById('ksNama').textContent = s.Nama_Kepala_Sekolah || "Nama Kepala Sekolah"; 
+                
                 
                 const visiMisiText = s.Sambutan_Kepala_Sekolah || "Tuliskan Visi dan Misi sekolah melalui menu Pengaturan Admin (@).";
                 document.getElementById('ksSambutan').innerHTML = visiMisiText.replace(/\n/g, '<br>');
